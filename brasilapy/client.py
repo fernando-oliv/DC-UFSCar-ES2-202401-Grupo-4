@@ -12,10 +12,9 @@ from brasilapy.models.general import (
     IbgeEstado,
     IbgeMunicipio,
     RegistroBrDominio,
-    TaxaJuros,
-    NCM
+    TaxaJuros
 )
-from brasilapy.processor import RequestsProcessor
+from processor import RequestsProcessor
 
 
 class BrasilAPI:
@@ -128,7 +127,9 @@ class BrasilAPI:
         if not state_uf:
             raise TypeError("A UF must be defined")
 
-        estado = self.processor.get_data(f"/ibge/uf/v1/{state_uf}")
+        estado = self.processor.get_ibge_estado(f"/ibge/uf/v1/{state_uf}")
+        #print(dir(self.processor))
+        print(self.processor.get_estado_clima(state_uf) )
         return IbgeEstado.parse_obj(estado)
 
     def get_registro_br_domain(self, fqdn: str) -> RegistroBrDominio:
@@ -154,15 +155,3 @@ class BrasilAPI:
     def get_taxa_juros(self, taxa: TaxaJurosType) -> TaxaJuros:
         taxa = self.processor.get_data(f"/taxas/v1/{taxa}")
         return TaxaJuros.parse_obj(taxa)
-    
-    def get_ncms(self) -> list[NCM]:
-        ncms = self.processor.get_data(f"/ncm/v1/")
-        return [NCM.parse_obj(ncm) for ncm in ncms]
-
-    def get_ncm(self, codigo: str) -> NCM:
-        ncm = self.processor.get_data(f"/ncm/v1/{codigo}")
-        return NCM.parse_obj(ncm)
-    
-    def get_ncm_descricao(self, descricao: str) -> list[NCM]:
-        ncms = self.processor.get_data(f"/ncm/v1?search={descricao}")
-        return [NCM.parse_obj(ncm) for ncm in ncms]
