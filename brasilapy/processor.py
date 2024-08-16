@@ -6,6 +6,7 @@ from pydantic import BaseModel, ValidationError
 
 
 from brasilapy.exceptions import ProcessorException
+from utils import CodigosEstados
 
 
 class ClientProcessor(ABC):
@@ -39,6 +40,7 @@ class IbgeEstado(BaseModel):
     sigla: str
     regiao: dict
 
+
 class EstadoClima(BaseModel):
     temperature: float
     humidity: int
@@ -48,12 +50,26 @@ class EstadoEconomia(BaseModel):
     gdp: float
     inflation: float
 
+
+def parse_estado(ibge_estado_obj : IbgeEstado, area_consulta, densidade_demografica_consulta):
+    EstadoGeral = {}
+    estado_base = IbgeEstado.parse_obj(ibge_estado_obj)
+    EstadoGeral['nome'] = estado_base.nome
+    EstadoGeral['id'] = estado_base.id
+    EstadoGeral['regiao'] = estado_base.regiao['nome']
+    EstadoGeral['area_km2'] = float(area_consulta[0]['res'][0]['res']['2022'])
+    EstadoGeral['densidade_demografica_por_km2'] = float(densidade_demografica_consulta[0]['res'][0]['res']['2022'])
+    return EstadoGeral
+
 class RequestsProcessor(ClientProcessor):
     handler: RequestSession = RequestSession()
     brasil_api_base_url = "https://brasilapi.com.br/api"
     openweather_api_base_url = "http://api.openweathermap.org/data/2.5/weather"
     bcb_api_base_url = "https://api.bcb.gov.br/dados/serie/bcdata.sgs."
     openweather_api_key = "YOUR_API_KEY"
+    area_ibge_estado_base_url = "https://servicodados.ibge.gov.br/api/v1/pesquisas/10102/indicadores/122230/resultados/"
+    densidade_demografica_base_url = "https://servicodados.ibge.gov.br/api/v1/pesquisas/10102/indicadores/122231/resultados/"
+    #é necessário acrescentar o id do estado no final, ex.: o de sp é 35
 
     def get_data(self, base_url: str, endpoint: str, params: dict | None = None) -> dict:
         response: requests.Response = self.handler.get(
@@ -70,9 +86,18 @@ class RequestsProcessor(ClientProcessor):
     def get_ibge_estado(self, state_uf: str) -> IbgeEstado:
         if not state_uf:
             raise TypeError("A UF must be defined")
+        if state_uf not in CodigosEstados:
+            raise TypeError("A UF não existe")
 
         estado = self.get_data(self.brasil_api_base_url, f"/ibge/uf/v1/{state_uf}")
-        return IbgeEstado.parse_obj(estado)
+        area_consulta = self.get_data(self.area_ibge_estado_base_url, f"{CodigosEstados[state_uf]}")
+        densidade = self.get_data(self.densidade_demografica_base_url, f"{CodigosEstados[state_uf]}")
+        geral = parse_estado(estado, area_consulta, densidade)
+    
+
+        #return IbgeEstado.parse_obj(estado)
+        return geral
+
 
     def get_estado_clima(self, state_name: str) -> EstadoClima:
         params = {

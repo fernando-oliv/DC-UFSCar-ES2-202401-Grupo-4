@@ -2,4 +2,5 @@ from client import BrasilAPI
 
 conector = BrasilAPI()
 
-conector.get_ibge_estado('sp')
+sp = conector.get_ibge_estado('sp')
+print(sp)

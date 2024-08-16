@@ -127,10 +127,9 @@ class BrasilAPI:
         if not state_uf:
             raise TypeError("A UF must be defined")
 
-        estado = self.processor.get_ibge_estado(f"/ibge/uf/v1/{state_uf}")
-        #print(dir(self.processor))
-        print(self.processor.get_estado_clima(state_uf) )
-        return IbgeEstado.parse_obj(estado)
+        estado = self.processor.get_ibge_estado(f"{state_uf}")
+        #print(self.processor.get_estado_clima(state_uf) )
+        return estado
 
     def get_registro_br_domain(self, fqdn: str) -> RegistroBrDominio:
         if not fqdn.endswith(".br"):
