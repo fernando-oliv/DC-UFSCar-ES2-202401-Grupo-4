@@ -9,9 +9,9 @@ class CNAE(BaseReturnModel):
 
 
 class SocioAdmin(BaseReturnModel):
-    pais: str | None
+    pais: str or None
     nome_socio: str
-    codigo_pais: str | None
+    codigo_pais: str or None
     faixa_etaria: str
     cnpj_cpf_do_socio: str  # with a filter
     qualificacao_socio: str
@@ -28,10 +28,10 @@ class SocioAdmin(BaseReturnModel):
 class CNPJ(BaseReturnModel):
     uf: str
     cep: str
-    qsa: list[SocioAdmin]
+    qsa: list
     cnpj: str
-    pais: str | None
-    email: str | None
+    pais: str or None
+    email: str or None
     porte: str
     bairro: str
     numero: str
@@ -39,7 +39,7 @@ class CNPJ(BaseReturnModel):
     municipio: str
     logradouro: str
     cnae_fiscal: int
-    codigo_pais: int | None
+    codigo_pais: int or None
     complemento: str
     codigo_porte: int
     razao_social: str
@@ -47,25 +47,25 @@ class CNPJ(BaseReturnModel):
     capital_social: int
     ddd_telefone_1: str
     ddd_telefone_2: str
-    opcao_pelo_mei: bool | None
+    opcao_pelo_mei: bool or None
     descricao_porte: str
     codigo_municipio: int
-    cnaes_secundarios: list[CNAE]
+    cnaes_secundarios: list
     natureza_juridica: str
     situacao_especial: str
-    opcao_pelo_simples: bool | None
+    opcao_pelo_simples: bool or None
     situacao_cadastral: int
-    data_opcao_pelo_mei: date | None
-    data_exclusao_do_mei: date | None
+    data_opcao_pelo_mei: date or None
+    data_exclusao_do_mei: date or None
     cnae_fiscal_descricao: str
     codigo_municipio_ibge: int
-    data_inicio_atividade: date | None
-    data_situacao_especial: str | None
-    data_opcao_pelo_simples: date | None
-    data_situacao_cadastral: date | None
+    data_inicio_atividade: date or None
+    data_situacao_especial: str or None
+    data_opcao_pelo_simples: date or None
+    data_situacao_cadastral: date or None
     nome_cidade_no_exterior: str
     codigo_natureza_juridica: int
-    data_exclusao_do_simples: date | None
+    data_exclusao_do_simples: date or None
     motivo_situacao_cadastral: int
     ente_federativo_responsavel: str
     identificador_matriz_filial: int

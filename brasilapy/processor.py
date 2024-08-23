@@ -5,8 +5,8 @@ from requests import Session as RequestSession
 from pydantic import BaseModel, ValidationError
 
 
-from brasilapy.exceptions import ProcessorException
-from utils import CodigosEstados
+from .exceptions import ProcessorException
+from .utils import CodigosEstados
 
 
 class ClientProcessor(ABC):
