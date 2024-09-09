@@ -50,6 +50,13 @@ class FeriadoNacional(BaseReturnModel):
     name: str
     type: str
 
+class Feriado(BaseReturnModel):
+    data: str
+    descricao: str
+
+class FeriadosEstaduais(BaseReturnModel):
+    feriados : list[Feriado]
+
 
 class FipeVeiculo(BaseReturnModel):
     nome: str
@@ -86,10 +93,11 @@ class IbgeEstadoRegiao(BaseReturnModel):
 
 
 class IbgeEstado(BaseReturnModel):
-    id: int
-    sigla: str
     nome: str
-    regiao: IbgeEstadoRegiao
+    id: int
+    regiao: str
+    area_km2: float
+    densidade_demografica_por_km2: float
 
 
 class RegistroBrDominio(BaseReturnModel):
@@ -117,3 +125,5 @@ class NCM(BaseReturnModel):
     tipo_ato: str
     numero_ato: str
     ano_ato: str
+
+

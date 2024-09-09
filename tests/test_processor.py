@@ -39,7 +39,7 @@ class TestRequestsProcessor:
 
             handler_mock.get.return_value = response_mock
 
-            requests_processor.get_data("/test")
+            requests_processor.get_data(self.processor.brasil_api_base_url,"/test")
 
         assert (
             handler_mock.method_calls[0].args[0] == "https://brasilapi.com.br/api/test"
@@ -58,7 +58,7 @@ class TestRequestsProcessor:
 
             handler_mock.get.return_value = response_mock
 
-            requests_processor.get_data(
+            requests_processor.get_data(self.processor.brasil_api_base_url,
                 endpoint="/test_with_arguments",
                 params={"name1": "value1", "name2": "value2"},
             )
@@ -84,7 +84,7 @@ class TestRequestsProcessor:
 
             handler_mock.get.return_value = response_mock
 
-            requests_processor.get_data("/test")
+            requests_processor.get_data(self.processor.brasil_api_base_url,"/test")
 
         assert "STATUS_CODE: 500 - NOT_OK_ERROR_MESSAGE_AS_TEXT" in str(exc.value)
 

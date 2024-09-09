@@ -1,20 +1,22 @@
-from .constants import APIVersion, FipeTipoVeiculo, IBGEProvider, TaxaJurosType
-from .models.cnpj import CNPJ
-from .models.general import (
+from constants import APIVersion, FipeTipoVeiculo, IBGEProvider, TaxaJurosType
+from models.cnpj import CNPJ
+from models.general import (
     CEP,
     DDD,
     Bank,
     CEPv2,
     FeriadoNacional,
+    Feriado,
     FipePreco,
     FipeTabelaItem,
     FipeVeiculo,
     IbgeEstado,
     IbgeMunicipio,
     RegistroBrDominio,
-    TaxaJuros
+    TaxaJuros,
+    NCM
 )
-from .processor import RequestsProcessor
+from processor import RequestsProcessor
 
 
 class BrasilAPI:
@@ -67,6 +69,10 @@ class BrasilAPI:
     def get_feriados(self, year: int) -> list[FeriadoNacional]:
         feriados = self.processor.get_data(self.processor.brasil_api_base_url,f"/feriados/v1/{year}")
         return [FeriadoNacional.model_validate(feriado) for feriado in feriados]
+
+    def get_feriados_estaduais(self, state) -> list[Feriado]:
+        feriados = self.processor.get_feriados_estaduais(state)
+        return [Feriado.model_validate({'data' :feriado[0], 'descricao' : feriado[1]}) for feriado in feriados]
 
     def get_fipe_veiculos(
         self,
@@ -127,9 +133,9 @@ class BrasilAPI:
         if not state_uf:
             raise TypeError("A UF must be defined")
 
-        estado = self.processor.get_ibge_estado(f"{state_uf}")
-        #print(self.processor.get_estado_clima(state_uf) )
-        return estado
+        estado: dict = self.processor.get_ibge_estado(f"{state_uf}")
+        return IbgeEstado.model_validate(estado)
+
 
     def get_registro_br_domain(self, fqdn: str) -> RegistroBrDominio:
         if not fqdn.endswith(".br"):
@@ -154,3 +160,14 @@ class BrasilAPI:
     def get_taxa_juros(self, taxa: TaxaJurosType) -> TaxaJuros:
         taxa = self.processor.get_data(self.processor.brasil_api_base_url,f"/taxas/v1/{taxa}")
         return TaxaJuros.model_validate(taxa)
+    def get_ncms(self) -> list[NCM]:
+        ncms = self.processor.get_data(self.processor.brasil_api_base_url,f"/ncm/v1/")
+        return [NCM.parse_obj(ncm) for ncm in ncms]
+
+    def get_ncm(self, codigo: str) -> NCM:
+        ncm = self.processor.get_data(self.processor.brasil_api_base_url,f"/ncm/v1/{codigo}")
+        return NCM.parse_obj(ncm)
+    
+    def get_ncm_descricao(self, descricao: str) -> list[NCM]:
+        ncms = self.processor.get_data(self.processor.brasil_api_base_url,f"/ncm/v1?search={descricao}")
+        return [NCM.parse_obj(ncm) for ncm in ncms]
