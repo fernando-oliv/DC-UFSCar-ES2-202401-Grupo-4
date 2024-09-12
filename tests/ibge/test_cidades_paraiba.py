@@ -248,5 +248,5 @@ class TestBrasilAPI(unittest.TestCase):
             self.assertEqual(municipios[i].nome, municipio.nome)
             self.assertEqual(municipios[i].codigo_ibge, municipio.codigo_ibge)
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     unittest.main()

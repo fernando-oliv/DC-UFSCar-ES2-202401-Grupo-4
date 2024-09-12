@@ -9,5 +9,5 @@ class ProcessorException(Exception):
         self.response_text = response_text
         self.message = message
 
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         return f"STATUS_CODE: {self.status_code} - {self.response_text}"

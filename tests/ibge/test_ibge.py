@@ -4,6 +4,7 @@ import pytest
 
 from brasilapy import BrasilAPI
 from brasilapy.models.general import IbgeEstado, IbgeMunicipio
+from brasilapy.processor import RequestsProcessor
 
 
 class TestIBGE:
@@ -104,3 +105,15 @@ class TestIBGE:
             
             # Verifica se o tipo do retorno é IbgeEstado
             assert type(ibge_estado) is IbgeEstado
+
+
+    def test_get_ibge_estado_no_uf(self):
+        requests_processor = RequestsProcessor()
+        with pytest.raises(TypeError, match="A UF must be defined"):
+            requests_processor.get_ibge_estado(None)
+
+
+    def test_get_ibge_estado_invalid_uf(self):
+        requests_processor = RequestsProcessor()
+        with pytest.raises(TypeError, match="A UF não existe"):
+            requests_processor.get_ibge_estado("xx")  # UF inválida

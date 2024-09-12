@@ -2,6 +2,7 @@ from unittest import mock
 import pytest
 from brasilapy import BrasilAPI
 from brasilapy.models.general import Feriado
+from brasilapy.processor import RequestsProcessor
 
 
 class TestFeriadosEstaduais:
@@ -47,3 +48,13 @@ class TestFeriadosEstaduais:
             feriados = brasil_api.get_feriados_estaduais("sp")
             get_data_mock.assert_called_once()
             assert len(feriados) == 0  # Verifica que não há feriados
+
+    def test_get_feriados_estaduais_no_uf(self):
+        requests_processor = RequestsProcessor()
+        with pytest.raises(TypeError, match="A UF must be defined"):
+            requests_processor.get_feriados_estaduais(None)
+
+    def test_get_feriados_estaduais_invalid_uf(self):
+        requests_processor = RequestsProcessor()
+        with pytest.raises(TypeError, match="A UF não existe"):
+            requests_processor.get_feriados_estaduais("xx")  # UF inválida

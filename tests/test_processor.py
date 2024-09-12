@@ -90,3 +90,6 @@ class TestRequestsProcessor:
             assert exc_info.value.status_code == 500
             assert exc_info.value.response_text == "NOT_OK_ERROR_MESSAGE_AS_TEXT"
             assert str(exc_info.value) == "Error 500: NOT_OK_ERROR_MESSAGE_AS_TEXT"
+  
+    
+    

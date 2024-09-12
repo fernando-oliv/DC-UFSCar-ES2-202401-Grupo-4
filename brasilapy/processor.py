@@ -8,6 +8,7 @@ from pydantic import BaseModel, ValidationError
 from .exceptions import ProcessorException
 from .utils import CodigosEstadosIbge, feriados_estaduais
 from .models.general import IbgeEstadoRegiao
+from requests.exceptions import Timeout, RequestException
 
 
 class ClientProcessor(ABC):
@@ -29,30 +30,28 @@ class ProcessorException(Exception):
         self.status_code = status_code
         self.response_text = response_text
         super().__init__(f"Error {status_code}: {response_text}")
-        
-        
+
+class RequestSession:
+    def get(self, url: str, params: dict | None = None, timeout: int = 10) -> requests.Response:
+        return requests.get(url, params=params, timeout=timeout)
 
 class RequestsProcessor:
     def __init__(self):
-        self.handler = requests.Session()
+        self.handler = RequestSession()
 
-    def get_data(self, base_url: str, endpoint: str, params: dict | None = None) -> dict:
-        response: requests.Response = self.handler.get(
-            f"{base_url}{endpoint}", params=params
-        )
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise ProcessorException(
-                status_code=response.status_code, response_text=response.text
+    def get_data(self, base_url: str, endpoint: str, params: dict = None, timeout: int = 10) -> dict:
+        try:
+            response: requests.Response = self.handler.get(
+                f"{base_url}{endpoint}",
+                params=params,
+                timeout=timeout  # Add the timeout parameter here
             )
-
-class RequestSession:
-    def get(self, url: str, params: dict | None = None) -> requests.Response:
-        return requests.get(url, params=params)
-
-
+            response.raise_for_status()
+            return response.json()
+        except Timeout as e:
+            raise ProcessorException(500, str(e))
+        except RequestException as e:
+            raise ProcessorException(response.status_code, str(e))
 class IbgeEstado(BaseModel):
     id: int
     nome: str
