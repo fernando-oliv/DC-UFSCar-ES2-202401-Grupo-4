@@ -1,6 +1,6 @@
-from constants import APIVersion, FipeTipoVeiculo, IBGEProvider, TaxaJurosType
-from models.cnpj import CNPJ
-from models.general import (
+from .constants import APIVersion, FipeTipoVeiculo, IBGEProvider, TaxaJurosType
+from .models.cnpj import CNPJ
+from .models.general import (
     CEP,
     DDD,
     Bank,
@@ -16,7 +16,7 @@ from models.general import (
     TaxaJuros,
     NCM
 )
-from processor import RequestsProcessor
+from .processor import RequestsProcessor
 
 
 class BrasilAPI:

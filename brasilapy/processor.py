@@ -5,8 +5,8 @@ from requests import Session as RequestSession
 from pydantic import BaseModel, ValidationError
 
 
-from exceptions import ProcessorException
-from utils import CodigosEstadosIbge, feriados_estaduais
+from .exceptions import ProcessorException
+from .utils import CodigosEstadosIbge, feriados_estaduais
 
 
 class ClientProcessor(ABC):
