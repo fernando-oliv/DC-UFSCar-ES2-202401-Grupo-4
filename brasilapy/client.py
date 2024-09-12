@@ -1,6 +1,6 @@
-from constants import APIVersion, FipeTipoVeiculo, IBGEProvider, TaxaJurosType
-from models.cnpj import CNPJ
-from models.general import (
+from .constants import APIVersion, FipeTipoVeiculo, IBGEProvider, TaxaJurosType
+from .models.cnpj import CNPJ
+from .models.general import (
     CEP,
     DDD,
     Bank,
@@ -16,7 +16,7 @@ from models.general import (
     TaxaJuros,
     NCM
 )
-from processor import RequestsProcessor
+from .processor import RequestsProcessor
 
 
 class BrasilAPI:
@@ -28,12 +28,12 @@ class BrasilAPI:
 
     def get_banks(self) -> list[Bank]:
         banks = self.processor.get_data(self.processor.brasil_api_base_url,"/banks/v1")
-        return [Bank.model_validate(bank) for bank in banks]
+        return [Bank.parse_obj(bank) for bank in banks]
 
     def get_bank(self, code: int) -> Bank:
         bank_response: dict = self.processor.get_data(self.processor.brasil_api_base_url,f"/banks/v1/{code}")
 
-        return Bank.model_validate(bank_response)
+        return Bank.parse_obj(bank_response)
 
     def get_cep(self, cep: str, api_version: APIVersion = APIVersion.V1) -> CEP | CEPv2:
 
@@ -50,29 +50,29 @@ class BrasilAPI:
 
         cep_details: dict = self.processor.get_data(self.processor.brasil_api_base_url,f"/cep/{api_version}/{cep}")
 
-        return model_class.model_validate(cep_details)
+        return model_class.parse_obj(cep_details)
 
     def get_cnpj(self, cnpj: str) -> CNPJ:
         if len(cnpj) != 14:
             raise TypeError("Please provide a valid CNPJ number")
 
         cnpj_details: dict = self.processor.get_data(self.processor.brasil_api_base_url,f"/cnpj/v1/{cnpj}")
-        return CNPJ.model_validate(cnpj_details)
+        return CNPJ.parse_obj(cnpj_details)
 
     def get_ddd(self, ddd: str):
         if len(ddd) != 2:
             raise TypeError("Please provide a DDD number (2 digits)")
 
         ddd_details: dict = self.processor.get_data(self.processor.brasil_api_base_url,f"/ddd/v1/{ddd}")
-        return DDD.model_validate(ddd_details)
+        return DDD.parse_obj(ddd_details)
 
     def get_feriados(self, year: int) -> list[FeriadoNacional]:
         feriados = self.processor.get_data(self.processor.brasil_api_base_url,f"/feriados/v1/{year}")
-        return [FeriadoNacional.model_validate(feriado) for feriado in feriados]
+        return [FeriadoNacional.parse_obj(feriado) for feriado in feriados]
 
     def get_feriados_estaduais(self, state) -> list[Feriado]:
         feriados = self.processor.get_feriados_estaduais(state)
-        return [Feriado.model_validate({'data' :feriado[0], 'descricao' : feriado[1]}) for feriado in feriados]
+        return [Feriado.parse_obj({'data' :feriado[0], 'descricao' : feriado[1]}) for feriado in feriados]
 
     def get_fipe_veiculos(
         self,
@@ -86,7 +86,7 @@ class BrasilAPI:
             else None,
         )
 
-        return [FipeVeiculo.model_validate(carro) for carro in carros]
+        return [FipeVeiculo.parse_obj(carro) for carro in carros]
 
     def get_fipe_precos(
         self, codigo_fipe: str, tabela_referencia: int | None = None
@@ -97,11 +97,11 @@ class BrasilAPI:
             if tabela_referencia
             else None,
         )
-        return [FipePreco.model_validate(preco) for preco in precos]
+        return [FipePreco.parse_obj(preco) for preco in precos]
 
     def get_fipe_tabelas(self) -> list[FipeTabelaItem]:
         items = self.processor.get_data(self.processor.brasil_api_base_url,"/fipe/tabelas/v1/")
-        return [FipeTabelaItem.model_validate(item) for item in items]
+        return [FipeTabelaItem.parse_obj(item) for item in items]
 
     def get_ibge_municipios(
         self,
@@ -123,18 +123,18 @@ class BrasilAPI:
             f"/ibge/municipios/v1/{state_uf}", params={"providers": ",".join(providers)}
         )
 
-        return [IbgeMunicipio.model_validate(municipio) for municipio in municipios]
+        return [IbgeMunicipio.parse_obj(municipio) for municipio in municipios]
 
     def get_ibge_estados(self) -> list[IbgeEstado]:
         estados = self.processor.get_data(self.processor.brasil_api_base_url,"/ibge/uf/v1")
-        return [IbgeEstado.model_validate(estado) for estado in estados]
+        return [IbgeEstado.parse_obj(estado) for estado in estados]
 
     def get_ibge_estado(self, state_uf: str) -> IbgeEstado:
         if not state_uf:
             raise TypeError("A UF must be defined")
 
         estado: dict = self.processor.get_ibge_estado(f"{state_uf}")
-        return IbgeEstado.model_validate(estado)
+        return IbgeEstado.parse_obj(estado)
 
 
     def get_registro_br_domain(self, fqdn: str) -> RegistroBrDominio:
@@ -151,15 +151,15 @@ class BrasilAPI:
         del registro_br_dominio["publication-status"]
         del registro_br_dominio["expires-at"]
 
-        return RegistroBrDominio.model_validate(registro_br_dominio)
+        return RegistroBrDominio.parse_obj(registro_br_dominio)
 
     def get_taxas_juros(self) -> list[TaxaJuros]:
         taxas = self.processor.get_data(self.processor.brasil_api_base_url,"/taxas/v1/")
-        return [TaxaJuros.model_validate(taxa) for taxa in taxas]
+        return [TaxaJuros.parse_obj(taxa) for taxa in taxas]
 
     def get_taxa_juros(self, taxa: TaxaJurosType) -> TaxaJuros:
         taxa = self.processor.get_data(self.processor.brasil_api_base_url,f"/taxas/v1/{taxa}")
-        return TaxaJuros.model_validate(taxa)
+        return TaxaJuros.parse_obj(taxa)
     def get_ncms(self) -> list[NCM]:
         ncms = self.processor.get_data(self.processor.brasil_api_base_url,f"/ncm/v1/")
         return [NCM.parse_obj(ncm) for ncm in ncms]

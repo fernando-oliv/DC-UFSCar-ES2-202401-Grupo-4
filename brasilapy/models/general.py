@@ -1,5 +1,4 @@
 from datetime import date, datetime
-
 from pydantic import BaseModel
 
 
@@ -50,12 +49,14 @@ class FeriadoNacional(BaseReturnModel):
     name: str
     type: str
 
+
 class Feriado(BaseReturnModel):
     data: str
     descricao: str
 
+
 class FeriadosEstaduais(BaseReturnModel):
-    feriados : list[Feriado]
+    feriados: list[Feriado]
 
 
 class FipeVeiculo(BaseReturnModel):
@@ -95,9 +96,10 @@ class IbgeEstadoRegiao(BaseReturnModel):
 class IbgeEstado(BaseReturnModel):
     nome: str
     id: int
-    regiao: str
-    area_km2: float
-    densidade_demografica_por_km2: float
+    regiao: IbgeEstadoRegiao  # Ajustado para ser um objeto de IbgeEstadoRegiao
+    sigla: str
+    area_km2: float | None = None  # Campos opcionais
+    densidade_demografica_por_km2: float | None = None  # Campos opcionais
 
 
 class RegistroBrDominio(BaseReturnModel):
@@ -125,5 +127,3 @@ class NCM(BaseReturnModel):
     tipo_ato: str
     numero_ato: str
     ano_ato: str
-
-

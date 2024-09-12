@@ -5,8 +5,9 @@ from requests import Session as RequestSession
 from pydantic import BaseModel, ValidationError
 
 
-from exceptions import ProcessorException
-from utils import CodigosEstadosIbge, feriados_estaduais
+from .exceptions import ProcessorException
+from .utils import CodigosEstadosIbge, feriados_estaduais
+from .models.general import IbgeEstadoRegiao
 
 
 class ClientProcessor(ABC):
@@ -28,6 +29,24 @@ class ProcessorException(Exception):
         self.status_code = status_code
         self.response_text = response_text
         super().__init__(f"Error {status_code}: {response_text}")
+        
+        
+
+class RequestsProcessor:
+    def __init__(self):
+        self.handler = requests.Session()
+
+    def get_data(self, base_url: str, endpoint: str, params: dict | None = None) -> dict:
+        response: requests.Response = self.handler.get(
+            f"{base_url}{endpoint}", params=params
+        )
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise ProcessorException(
+                status_code=response.status_code, response_text=response.text
+            )
 
 class RequestSession:
     def get(self, url: str, params: dict | None = None) -> requests.Response:
@@ -50,16 +69,32 @@ class EstadoEconomia(BaseModel):
     gdp: float
     inflation: float
 
-
-def parse_estado(ibge_estado_obj : IbgeEstado, area_consulta, densidade_demografica_consulta):
+def parse_estado(ibge_estado_obj: dict, area_consulta, densidade_demografica_consulta):
     EstadoGeral = {}
-    estado_base = IbgeEstado.parse_obj(ibge_estado_obj)
-    EstadoGeral['nome'] = estado_base.nome
-    EstadoGeral['id'] = estado_base.id
-    EstadoGeral['regiao'] = estado_base.regiao['nome']
-    EstadoGeral['area_km2'] = float(area_consulta[0]['res'][0]['res']['2022'])
-    EstadoGeral['densidade_demografica_por_km2'] = float(densidade_demografica_consulta[0]['res'][0]['res']['2022'])
+    EstadoGeral['nome'] = ibge_estado_obj['nome']
+    EstadoGeral['id'] = ibge_estado_obj['id']
+    EstadoGeral['sigla'] = ibge_estado_obj['sigla']
+    EstadoGeral['regiao'] = IbgeEstadoRegiao.parse_obj(ibge_estado_obj['regiao'])
+
+    print(f"Área consulta: {area_consulta}")  # Adicione esta linha
+    print(f"Densidade consulta: {densidade_demografica_consulta}")  # Adicione esta linha
+
+    try:
+        EstadoGeral['area_km2'] = float(area_consulta[0]['res'][0]['res']['2022'])
+    except (IndexError, KeyError, TypeError):
+        EstadoGeral['area_km2'] = None
+
+    try:
+        EstadoGeral['densidade_demografica_por_km2'] = float(densidade_demografica_consulta[0]['res'][0]['res']['2022'])
+    except (IndexError, KeyError, TypeError):
+        EstadoGeral['densidade_demografica_por_km2'] = None
+
+    print(f"EstadoGeral: {EstadoGeral}")  # Adicione esta linha para ver os valores finais
+
     return EstadoGeral
+
+
+
 
 class RequestsProcessor(ClientProcessor):
     handler: RequestSession = RequestSession()
